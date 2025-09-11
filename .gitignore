@@ -83,3 +83,4 @@ tags
 
 # End of https://www.toptal.com/developers/gitignore/api/vim,macos,java
 compile_flags.txt
+*.zip
