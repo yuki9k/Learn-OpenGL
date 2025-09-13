@@ -31,10 +31,25 @@ const char *FRAGMENT_SHADER_SOURCE =
 int main(void) {
   // clang-format off
   // x,y,z in normalized device coordinates
+  //
+  // Triangle
+  // const float vertices[] = {
+  //   -0.5f, -0.5f, 0.0f,
+  //   0.5f, -0.5f, 0.0f,
+  //   0.0f, 0.5f, 0.0f
+  // };
+  //
+  // Rectangle
   const float vertices[] = {
-    -0.5f, -0.5f, 0.0f,
+    0.5f, 0.5f, 0.0f,
     0.5f, -0.5f, 0.0f,
-    0.0f, 0.5f, 0.0f
+    -0.5f, -0.5f, 0.0f,
+    -0.5f, 0.5f, 0.0f
+  };
+
+  const unsigned int indices[] = {
+    0, 1, 3,
+    1, 2, 3
   };
   // clang-format on
 
@@ -105,11 +120,10 @@ int main(void) {
   glDeleteShader(vertex_shader);
   glDeleteShader(fragment_shader);
 
-  unsigned int VAO;
+  unsigned int VAO, VBO, EBO;
   glGenVertexArrays(1, &VAO);
   glBindVertexArray(VAO);
 
-  unsigned int VBO;
   glGenBuffers(1, &VBO); // Generates buffer ID
   // Buffer type of VBO is GL_ARRAY_BUFFER
   // NOTE: We can bind several buffer objects at once as long as they're
@@ -121,6 +135,11 @@ int main(void) {
   glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices,
                GL_STATIC_DRAW); // Allocates and stores data in the currently
                                 // bound buffer object (rn VBO)
+
+  glGenBuffers(1, &EBO);
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+  glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices,
+               GL_STATIC_DRAW);
 
   // Specify what input data goes to which vertex attribute in the vertex shader
   glVertexAttribPointer(
@@ -134,14 +153,19 @@ int main(void) {
   // is the one currently bound to the buffer (GL_ARRAY_BUFFER)
   // Therefore our VBO is now associated with vertex attribute 0
 
+  glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+
   while (!glfwWindowShouldClose(window)) {
     process_input(window);
 
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
+
     glUseProgram(shader_program);
     glBindVertexArray(VAO);
-    glDrawArrays(GL_TRIANGLES, 0, 3);
+    // glDrawArrays(GL_TRIANGLES, 0, 3);
+    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+
     glfwPollEvents();
     glfwSwapBuffers(window);
   }
