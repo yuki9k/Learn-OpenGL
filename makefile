@@ -1,8 +1,8 @@
 CC      = clang
 CFLAGS  = -Wall -Iinclude
 LDFLAGS =
-LDLIBS  = -lglfw
-SRCS    = src/main.c src/glad.c src/shader.c
+LDLIBS  = -lglfw -lm
+SRCS    = src/main.c src/glad.c src/shader.c 
 OBJS    = $(SRCS:.c=.o)
 TARGET  = bin/learnopengl
 

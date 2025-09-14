@@ -86,3 +86,4 @@ compile_flags.txt
 *.zip
 bin/
 src/*.o
+notes.typ

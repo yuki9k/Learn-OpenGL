@@ -1,4 +1,6 @@
+#define STB_IMAGE_IMPLEMENTATION
 #include "shader.h"
+#include "stb_image.h"
 // clang-format off
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
@@ -6,8 +8,18 @@
 #include <stdio.h>
 // clang-format on
 
+typedef struct {
+  const char *tex_path;
+  unsigned char *data;
+  int width;
+  int height;
+  int nr_channels;
+} Texture;
+
 void framebuffer_size_callback(GLFWwindow *window, int width, int height);
 void process_input(GLFWwindow *window);
+void create_texture(Texture *texture, const char *path);
+void free_texture(Texture *texture);
 
 // We do not have to transform vertex data to NDC in this case since our data
 // (vertices) already is NDC. Usually this is something that we need to do
@@ -79,6 +91,13 @@ int main(void) {
   create_shader_prog(&shader_prog, "src/shader/shader.vert",
                      "src/shader/shader.frag");
 
+  Texture container_texture;
+  GLuint gl_container_texture;
+  create_texture(&container_texture, "src/texture/container.jpg");
+  glGenTextures(1, &gl_container_texture);
+  // TODO
+  glBindTexture(GL_TEXTURE_2D, gl_container_texture);
+
   // unsigned int VAO, VBO, EBO;
   unsigned int VAO, VBO;
   glGenVertexArrays(1, &VAO);
@@ -141,6 +160,7 @@ int main(void) {
     glfwSwapBuffers(window);
   }
 
+  free_texture(&container_texture);
   glDeleteVertexArrays(1, &VAO);
   glDeleteBuffers(1, &VBO);
   // glDeleteBuffers(1, &EBO);
@@ -160,4 +180,26 @@ void process_input(GLFWwindow *window) {
   if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
     glfwSetWindowShouldClose(window, 1);
   }
+}
+
+void create_texture(Texture *texture, const char *path) {
+  texture->tex_path = path;
+  unsigned char *data = stbi_load(path, &texture->width, &texture->height,
+                                  &texture->nr_channels, 0);
+
+  if (data == NULL) {
+    printf("Failed to load texture: %s\n", path);
+    texture->data = NULL;
+    return;
+  }
+
+  texture->data = data;
+}
+
+void free_texture(Texture *texture) {
+  stbi_image_free(texture->data);
+  texture->data = NULL;
+  texture->width = 0;
+  texture->height = 0;
+  texture->nr_channels = 0;
 }
