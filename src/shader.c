@@ -5,32 +5,33 @@
 
 const int SHADER_SRC_SIZE = 1024 * 16; // 16kb
 
-void create_shader_prog(const char *frag_src_path, const char *vert_src_path) {
+void create_shader_prog(GLuint *shader_prog, const char *vert_src_path,
+                        const char *frag_src_path) {
   GLint link_success;
   GLchar link_log[512];
 
-  GLuint shader_prog, vert_shader, frag_shader;
+  GLuint vert_shader, frag_shader;
   char vert_shader_src[SHADER_SRC_SIZE];
   char frag_shader_src[SHADER_SRC_SIZE];
 
   load_shader_src(vert_src_path, vert_shader_src);
   load_shader_src(frag_src_path, frag_shader_src);
 
-  shader_prog = glCreateProgram();
+  *shader_prog = glCreateProgram();
   vert_shader = glCreateShader(GL_VERTEX_SHADER);
   frag_shader = glCreateShader(GL_FRAGMENT_SHADER);
 
   compile_shader(vert_shader, vert_shader_src);
   compile_shader(frag_shader, frag_shader_src);
 
-  glAttachShader(shader_prog, vert_shader);
-  glAttachShader(shader_prog, frag_shader);
-  glLinkProgram(shader_prog);
+  glAttachShader(*shader_prog, vert_shader);
+  glAttachShader(*shader_prog, frag_shader);
+  glLinkProgram(*shader_prog);
 
-  glGetProgramiv(shader_prog, GL_LINK_STATUS, &link_success);
+  glGetProgramiv(*shader_prog, GL_LINK_STATUS, &link_success);
 
   if (link_success == GL_FALSE) {
-    glGetProgramInfoLog(shader_prog, 512, NULL, link_log);
+    glGetProgramInfoLog(*shader_prog, 512, NULL, link_log);
     printf("Failed to link shaders");
   }
 
@@ -38,14 +39,13 @@ void create_shader_prog(const char *frag_src_path, const char *vert_src_path) {
   glDeleteShader(frag_shader);
 }
 
-int load_shader_src(const char *shader_src_path,
-                    char shader_src[SHADER_SRC_SIZE]) {
+void load_shader_src(const char *shader_src_path,
+                     char shader_src[SHADER_SRC_SIZE]) {
   FILE *f = fopen(shader_src_path, "r");
 
   if (!f) {
-    printf(stderr, "Failed to open file '%s'", shader_src_path);
+    // printf(stderr, "Failed to open file '%s'", shader_src_path);
     perror("fopen() failed:");
-    return EXIT_FAILURE;
   }
 
   int ch;
@@ -56,16 +56,14 @@ int load_shader_src(const char *shader_src_path,
   }
 
   if (ferror(f)) {
-    printf(stderr, "Error reading file '%s'", shader_src_path);
-    return EXIT_FAILURE;
+    // printf(stderr, "Error reading file '%s'", shader_src_path);
   }
 
   fclose(f);
-  printf("Shader file '%s' successfully read", shader_src_path);
-  return EXIT_SUCCESS;
+  printf("Shader file '%s' successfully read\n", shader_src_path);
 }
 
-int compile_shader(GLuint shader, const char shader_src[SHADER_SRC_SIZE]) {
+void compile_shader(GLuint shader, const char shader_src[SHADER_SRC_SIZE]) {
   GLint compile_success;
   GLchar compile_log[512];
 
@@ -76,9 +74,7 @@ int compile_shader(GLuint shader, const char shader_src[SHADER_SRC_SIZE]) {
   if (compile_success == GL_FALSE) {
     glGetShaderInfoLog(shader, 512, NULL, compile_log);
     printf("Failed to compile shader:\n%s", compile_log);
-    return EXIT_FAILURE;
   }
 
-  printf("Succesfully compiled shader:\n%s", compile_log);
-  return EXIT_SUCCESS;
+  printf("Succesfully compiled shader\n");
 }
