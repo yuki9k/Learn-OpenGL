@@ -1,12 +1,5 @@
-#define STB_IMAGE_IMPLEMENTATION
 #include "shader.h"
 #include "stb_image.h"
-// clang-format off
-#include <glad/glad.h>
-#include <GLFW/glfw3.h>
-// #include <math.h>
-#include <stdio.h>
-// clang-format on
 
 typedef struct {
   const char *tex_path;
